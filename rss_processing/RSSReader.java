@@ -14,16 +14,29 @@ import com.sun.cnpi.rss.parser.RssParser;
 import com.sun.cnpi.rss.parser.RssParserException;
 import com.sun.cnpi.rss.parser.RssParserFactory;
 
+/**
+ * The RSSReader class is used to connect to the given RSS feed, download and parse the retrieved
+ * XML file. It uses the RSS Utilities library (rssutils.jar) to accomplish this.
+ * 
+ * @see com.sun.cnpi.rss.parser.RssParser
+ * @see rss_processing.Atom
+ */
 public class RSSReader {
-	private URL rssURL = null;
-	private RssParser parser = null;
-	private Rss rssReader = null;
-	private Vector<Atom> atoms = null;
+	private URL rssURL = null; //the URL of the RSS feed
+	private RssParser parser = null; //the RSS feed reader and XML document parser
+	private Rss rssStore = null; //stores the RSS atoms
+	private Vector<Atom> atoms = null; //the Vector of RSS atom metadata read from the feed
 	
+	/**
+	 * Sets the URL for the RSS feed to read from, then reads and parses the XML document from that
+	 * feed, storing the resulting atoms.
+	 * 
+	 * @param rssURLString The String of the RSS feed URL
+	 */
 	public void setRssURL (String rssURLString) {
 		try {
 			this.rssURL = new URL(rssURLString);
-			this.rssReader = this.parser.parse(this.rssURL);
+			this.rssStore = this.parser.parse(this.rssURL);
 		} catch (MalformedURLException mue) {
 			System.err.printf("[RSSReader.setRssURL] %s is not a well formed URL\n", rssURLString);
 		} catch (RssParserException rpe) {
@@ -31,15 +44,23 @@ public class RSSReader {
 		} catch (IOException e) {
 			System.err.printf("[RSSReader.setRssURL] I/O error reading %s\n", rssURLString);
 		}
-	}
+	}//end void setRssURL (String)
 	
+	/**
+	 * Returns the Vector of RSS atoms (articles).
+	 * 
+	 * @return The Vector of RSS atoms
+	 */
 	public Vector<Atom> getRssAtoms () {
 		return this.atoms;
-	}
+	}//end Vector<Atom> getRssAtoms ()
 	
+	/**
+	 * Iterates through the individual Item objects stored in rssReader and converts them into
+	 * Atom objects.
+	 */
 	public void setRssAtoms () {
-		Channel channel = rssReader.getChannel();
-		System.out.printf("No. of items: %d\n", channel.getItems().size());
+		Channel channel = rssStore.getChannel();
 		Object[] items = channel.getItems().toArray();
 		
 		for (int i = 0; i < items.length; i++) {
@@ -49,14 +70,23 @@ public class RSSReader {
 				System.err.printf("[RSSReader] Item %d is null!\n", i);
 			}
 		}
-	}
+	}//end void setRssAtoms ()
 	
+	/**
+	 * Initializes the RssParser and the Vector of Atoms.
+	 * 
+	 * @param rssURLString The String of the RSS feed URL
+	 * @throws RssParserException
+	 */
 	public RSSReader (String rssURLString) throws RssParserException {
 		this.parser = RssParserFactory.createDefault();
 		this.atoms = new Vector<Atom>();
 		this.setRssURL(rssURLString);
-	}
+	}//end constructor (String)
 	
+	/**
+	 * Test main
+	 */
 	public static void main (String[] args) {
 		RSSReader r = null;
 		
@@ -81,5 +111,5 @@ public class RSSReader {
 			System.err.println("Error initializing parser!");
 			System.exit(1);
 		}
-	}
-}
+	}//end void main (String[])
+}//end class RSSReader

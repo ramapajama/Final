@@ -1,32 +1,45 @@
 package rss_processing;
 
-import java.util.Calendar;
-import java.util.TimeZone;
+//import java.util.Calendar;
+//import java.util.TimeZone;
 
 import com.sun.cnpi.rss.elements.Author;
 import com.sun.cnpi.rss.elements.BasicElement;
 import com.sun.cnpi.rss.elements.Description;
 import com.sun.cnpi.rss.elements.Guid;
 import com.sun.cnpi.rss.elements.Item;
-import com.sun.cnpi.rss.elements.Link;
+//import com.sun.cnpi.rss.elements.Link;
 import com.sun.cnpi.rss.elements.PubDate;
 import com.sun.cnpi.rss.elements.Title;
 
-public class Atom implements Comparable {
-	private Title title = null;
-	private Link link = null;
-	private Description description = null;
-	private PubDate pubDate = null;
-	private Author author = null;
-	private Guid guid = null;
-	private String tagline = null;
-	private String category = null;
+/**
+ * The Atom class is a container for the pertinent elements from the RSS "atoms", in this case
+ * the individual news articles. These elements are obtained from the Item class defined by the
+ * RSS Utilities library (rssutils.jar)
+ */
+public class Atom { //implements Comparable {
+	private Title title = null; //article title
+	private Description description = null; //for the Guardian, this is the article text
+	private PubDate pubDate = null; //the publication date of the article
+	private Author author = null; //the article author, undefined for the Guardian
+	private Guid guid = null; //the URL of the original article
+	private String tagline = null; //the article tag line
+	private String category = null; //the article category
 	
-	private static final int DATE_ELEMENT_LEN = 6;
-	private static final String TAG_ELEM_START = "<p class=\"standfirst\">";
+	private static final String TAG_ELEM_START = "<p class=\"standfirst\">"; //HTML elements
 	private static final String TAG_ELEM_END = "</p>";
 	private static final int CATEGORY_INDEX = 3; //Valid only for Guardian URLs
+	private static final String MISC_CAT = "Miscellaneous"; //Default category in case an article does not have one
 	
+	/**
+	 * Generic method for converting the given BasicElement to a String. This method is only
+	 * used internally.
+	 * 
+	 * @param element The BasicElement to convert
+	 * @return The String value of the given BasicElement
+	 * 
+	 * @see com.sun.cnpi.rss.elements.BasicElement
+	 */
 	private String getElementString (BasicElement element) {
 		String retval = "";
 		
@@ -35,24 +48,49 @@ public class Atom implements Comparable {
 		}
 		
 		return retval;
-	}
+	}//end String getElementString (BasicElement)
 	
+	/**
+	 * Returns the String of the publication date.
+	 * 
+	 * @return The String of the publication date
+	 */
 	public String getPubDate () {
 		return this.getElementString(this.pubDate);
-	}
+	}//end String getPubDate ()
 	
+	/**
+	 * Returns the String of the article title.
+	 * 
+	 * @return The String of the article title
+	 */
 	public String getTitle () {
 		return this.getElementString(this.title);
-	}
+	}//end String getTitle ()
 	
+	/**
+	 * Returns the String of the article tag line.
+	 * 
+	 * @return The String of the article tag line
+	 */
 	public String getTagline () {
 		return this.tagline;
-	}
+	}//end String getTagline ()
 	
+	/**
+	 * Returns the String of the original article's URL.
+	 * 
+	 * @return The String of the original article's URL
+	 */
 	public String getGuid () {
 		return this.getElementString(this.guid);
-	}
+	}//end String getGuid ()
 	
+	/**
+	 * Returns the String of the article text with HTML formatting removed.
+	 * 
+	 * @return The String of the article text
+	 */
 	public String getDescriptionText () {
 		String retval = "";
 		
@@ -62,12 +100,23 @@ public class Atom implements Comparable {
 		retval = retval.replaceAll("<.+?>", "");
 		
 		return retval;
-	}
+	}//end String getDescriptionText ()
 	
+	/**
+	 * Returns the String of the article category.
+	 * 
+	 * @return The String of the article category
+	 */
 	public String getCategory () {
 		return this.category;
 	}//end String getCategory ()
 	
+	/**
+	 * Extracts the article tag line from the <description> tag.
+	 * 
+	 * @param description The String of the <description> tag text with HTML formatting
+	 * @return The String of the article tag line, or "" if it is not found
+	 */
 	private String extractTagline (String description) {
 		String retval = "";
 		
@@ -84,8 +133,15 @@ public class Atom implements Comparable {
 		return retval;
 	}//end String extractTagline (String)
 	
+	/**
+	 * Extracts the article category from article's URL; for Guardian articles, this occurs at the
+	 * same place within the URL.
+	 * 
+	 * @param articleURL The String of the article URL
+	 * @return The String of the article category, or MISC_CAT if it was not found
+	 */
 	private String extractCategory (String articleURL) {
-		String retval = null;
+		String retval = MISC_CAT;
 		
 		String[] urlElements = articleURL.split("/");
 		
@@ -96,27 +152,24 @@ public class Atom implements Comparable {
 		return retval;
 	}//end String extractCategory (String)
 	
+	/**
+	 * Implementation of the toString method - used for debugging purposes.
+	 * 
+	 * @return The String of this Atom object
+	 */
 	public String toString () {
 		String retval = "";
 		
 		retval += String.format("Title: %s\n", this.getElementString(this.title));
-		retval += String.format("Link: %s\n", this.getElementString(this.link));
 		retval += String.format("Desc: %s\n", this.getDescriptionText());
 		retval += String.format("Date: %s\n", this.getElementString(this.pubDate));
 		retval += String.format("Author: %s\n", this.getElementString(this.author));
 		
 		return retval;
-	}
+	}//end String toString ()
 	
-	public String toHeadlineHTML () {
-		String retval = "";
-		
-		retval += String.format("<a href=\"%s\">%s</a>", this.getElementString(this.link), this.getTitle());
-		
-		return retval;
-	}
 	
-	private int getMonth (String monthString) {
+	/*private int getMonth (String monthString) {
 		int retval = 0;
 		
 		if (monthString.equals("Jan")) {
@@ -132,7 +185,7 @@ public class Atom implements Comparable {
 		}
 		
 		return retval;
-	}
+	}//end int getMonth (String)
 	
 	public Calendar convertDateStringToCalendar (String dateString) {
 		String[] elements = dateString.split("(, | )");
@@ -174,11 +227,15 @@ public class Atom implements Comparable {
 		}
 		
 		return retval;
-	}//end int compareTo (Object)
+	}//end int compareTo (Object)*/
 
+	/**
+	 * Constructor, which initializes element values.
+	 * 
+	 * @param item The Item which represents the RSS atom (article)
+	 */
 	public Atom (Item item) {
 		this.title = item.getTitle();
-		this.link = item.getLink();
 		this.description = item.getDescription();
 		this.pubDate = item.getPubDate();
 		this.author = item.getAuthor();

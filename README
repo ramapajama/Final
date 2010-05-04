@@ -1,0 +1,46 @@
+NAME
+	At A Glance - A news summarization service
+
+USAGE
+	AtAGlance feed_url index_file summaries_directory
+
+PARAMETERS
+	feed_url            - The URL of the RSS feed to pull articles from
+
+	index_file          - The file path for the index.html file
+
+	summaries_directory - The file path for the directory to store the
+			      article summary files
+
+FILES
+	AtAGlance           - The run script
+
+	README              - This README file
+
+	control/
+		TerracedNews.java - The driver Java class which runs the
+				    system, calling the RSSReader every 5
+				    minutes to download the latest articles
+				    then generate the necessary HTML files
+
+	makefile            - The system build file
+
+	manifest.mf         - The manifest file for the generated JAR file
+
+	rss_processing/
+		Atom.java         - A supporting Java class, used to store
+				    article metadata
+
+		RSSReader.java    - A supporting Java class, used to download
+				    and parse the target RSS feed
+
+LIBRARIES
+	Classifier4J-0.6.jar - The Classifier4J library
+
+	rssutils.jar         - The RSS Utilities library
+
+SETUP
+	run "make"
+
+RUNNING THE DEMO
+	run "./AtAGlance http://feeds.guardian.co.uk/theguardian/rss index.html summaries/"
